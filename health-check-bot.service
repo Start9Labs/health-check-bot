@@ -1,0 +1,14 @@
+[Unit]
+Description=Health Check Matrix Bot
+After=network.target systemd-time-wait-sync.service
+Requires=network.target
+Wants=avahi-daemon.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/health-check-bot
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
