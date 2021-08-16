@@ -18,12 +18,12 @@ struct Config {
 }
 
 fn main() {
-    let config: Config = toml::from_str(
-        &std::fs::read_to_string(
+    let config: Config = serde_yaml::from_reader(
+        &std::fs::File::open(
             std::env::args()
                 .skip(1)
                 .next()
-                .unwrap_or_else(|| "/etc/health-check-bot/config.toml".to_owned()),
+                .unwrap_or_else(|| "/etc/health-check-bot/config.yaml".to_owned()),
         )
         .unwrap(),
     )

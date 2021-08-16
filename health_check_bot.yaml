@@ -1,0 +1,9 @@
+id: "Health Check Bot"
+url: null
+as_token: "<CHANGEME>"
+hs_token: "<CHANGEME>"
+sender_localpart: "_health_check_bot" # Will result in @_health_check_bot:example.org
+namespaces:
+  users: []
+  aliases: []
+  rooms: []

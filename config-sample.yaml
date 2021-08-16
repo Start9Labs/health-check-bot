@@ -1,0 +1,6 @@
+room_id: "!asdfghjkl:matrix.org"
+access_token: "<CHANGEME>"
+user_id: "@_health_check_bot:matrix.org"
+base_url: "https://matrix.org"
+interval: 30
+health_checks: []
