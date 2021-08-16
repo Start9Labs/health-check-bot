@@ -1,16 +1,19 @@
 [package]
-name = "health-check-bot"
-version = "0.1.0"
 authors = ["Aiden McClelland <me@drbonez.dev>"]
 edition = "2018"
+name = "health-check-bot"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.43"
 base32 = "0.4.0"
-rand = "0.8.4"
-ruma = { version = "0.2.0", features = ["api", "client-api", "appservice-api"] }
-reqwest = { version = "0.11.4", features = ["blocking"] }
 openssl = { version = "0.10.35", features = ["vendored"] }
+rand = "0.8.4"
+reqwest = { version = "0.11.4", features = ["json"] }
+ruma = { version = "0.3.0", features = ["api", "client-api", "appservice-api"] }
 serde = { version = "1.0.127", features = ["derive"] }
+serde_json = "1.0.66"
 serde_yaml = "0.8.17"
+tokio = { version = "1.10.0", features = ["full"] }
