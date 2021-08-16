@@ -75,7 +75,7 @@ async fn main() -> Result<(), Error> {
                     }
                 }
             });
-            std::thread::sleep(std::time::Duration::from_secs_f64(config.interval))
         }
+        tokio::time::sleep(std::time::Duration::from_secs_f64(config.interval)).await;
     }
 }
