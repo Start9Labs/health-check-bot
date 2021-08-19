@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::sync::Arc;
 
@@ -17,6 +18,7 @@ struct Config {
     base_url: String,
     health_checks: Vec<String>,
     interval: f64,
+    cooldown: usize,
 }
 
 #[tokio::main]
@@ -31,16 +33,26 @@ async fn main() -> Result<(), Error> {
         .await?,
     )?;
     let config = Arc::new(config);
+    let mut cooldown_map: HashMap<String, usize> = config
+        .health_checks
+        .iter()
+        .map(|h| (h.clone(), 0))
+        .collect();
     loop {
-        for health_check in &config.health_checks {
+        let mut results = Vec::with_capacity(cooldown_map.len());
+        for (health_check, cooldown) in &mut cooldown_map {
+            if *cooldown > 0 {
+                *cooldown -= 1;
+                continue;
+            }
             let cfg = config.clone();
             let health_check = health_check.clone();
-            tokio::spawn(async move {
+            results.push(tokio::spawn(async move {
                 if let Err(e) = reqwest::get(&health_check)
                     .await
                     .and_then(|res| res.error_for_status())
                 {
-                    if let Err(e) = (|| async move {
+                    if let Err(e) = (|| async {
                         let res = reqwest::Client::new()
                             .execute(
                                 ruma::api::client::r0::message::send_message_event::Request::new(
@@ -73,8 +85,16 @@ async fn main() -> Result<(), Error> {
                     {
                         eprintln!("ERROR SENDING MATRIX MESSAGE: {}", e);
                     }
+                    Some(health_check)
+                } else {
+                    None
                 }
-            });
+            }));
+        }
+        for result in results {
+            if let Some(check) = result.await.unwrap() {
+                *cooldown_map.get_mut(&check).unwrap() = config.cooldown;
+            }
         }
         tokio::time::sleep(std::time::Duration::from_secs_f64(config.interval)).await;
     }
