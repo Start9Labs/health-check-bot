@@ -15,6 +15,38 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f093eed78becd229346bf859eec0aa4dd7ddde0757287b2b4107a1f09c80002"
 
 [[package]]
+name = "async-stream"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "171374e7e3b2504e0e5236e3b59260560f9fe94bfe9ac39ba5e4e929c5590625"
+dependencies = [
+ "async-stream-impl",
+ "futures-core",
+]
+
+[[package]]
+name = "async-stream-impl"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "648ed8c8d2ce5409ccd57453d9d1b214b342a0d69376a6feda1fd6cae3299308"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "async-trait"
+version = "0.1.51"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "44318e776df68115a881de9a8fd1b9e53368d7a4a5ce4cc48517da3393233a5e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -211,7 +243,6 @@ dependencies = [
  "reqwest",
  "ruma",
  "serde",
- "serde_json",
  "serde_yaml",
  "tokio",
 ]
@@ -705,7 +736,6 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite",
  "serde",
- "serde_json",
  "serde_urlencoded",
  "tokio",
  "tokio-native-tls",
@@ -725,6 +755,7 @@ dependencies = [
  "assign",
  "js_int",
  "ruma-api",
+ "ruma-client",
  "ruma-client-api",
  "ruma-common",
  "ruma-events",
@@ -759,6 +790,28 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "ruma-client"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54e6e9a07dccffb99eb814922f81ad19861e52b1b68bab502a4b568e814cda2a"
+dependencies = [
+ "assign",
+ "async-stream",
+ "async-trait",
+ "bytes",
+ "futures-core",
+ "http",
+ "reqwest",
+ "ruma-api",
+ "ruma-client-api",
+ "ruma-common",
+ "ruma-identifiers",
+ "ruma-serde",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
