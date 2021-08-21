@@ -33,11 +33,14 @@ async fn main() -> Result<(), Error> {
         .await?,
     )?;
     let config = Arc::new(config);
+    let http_client = reqwest::Client::new();
+
     let mut cooldown_map: HashMap<String, usize> = config
         .health_checks
         .iter()
         .map(|h| (h.clone(), 0))
         .collect();
+
     loop {
         let mut results = Vec::with_capacity(cooldown_map.len());
         for (health_check, cooldown) in &mut cooldown_map {
@@ -47,13 +50,16 @@ async fn main() -> Result<(), Error> {
             }
             let cfg = config.clone();
             let health_check = health_check.clone();
+            let http_client = http_client.clone();
             results.push(tokio::spawn(async move {
-                if let Err(e) = reqwest::get(&health_check)
+                if let Err(e) = http_client
+                    .get(&health_check)
+                    .send()
                     .await
                     .and_then(|res| res.error_for_status())
                 {
                     if let Err(e) = (|| async {
-                        let res = reqwest::Client::new()
+                        let res = http_client
                             .execute(
                                 ruma::api::client::r0::message::send_message_event::Request::new(
                                     &cfg.room_id,
