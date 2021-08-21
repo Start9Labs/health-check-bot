@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use anyhow::Error;
 use ruma::api::client::r0::message::send_message_event;
 use ruma::events::room::message::MessageEventContent;
 use ruma::events::AnyMessageEventContent;
@@ -20,7 +19,7 @@ struct Config {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> anyhow::Result<()> {
     let config: Config = serde_yaml::from_str(
         &tokio::fs::read_to_string(
             std::env::args()
