@@ -1,17 +1,18 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use ruma::api::client::r0::message::send_message_event;
-use ruma::events::room::message::MessageEventContent;
-use ruma::events::AnyMessageEventContent;
-use ruma::{RoomId, UserId};
+use color_eyre::eyre::Error;
+use ruma::api::client::message::send_message_event;
+use ruma::events::room::message::RoomMessageEventContent;
+use ruma::events::AnyMessageLikeEventContent;
+use ruma::{OwnedRoomId, OwnedUserId, TransactionId};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct Config {
-    room_id: RoomId,
+    room_id: OwnedRoomId,
     access_token: String,
-    user_id: UserId,
+    user_id: OwnedUserId,
     base_url: String,
     health_checks: Vec<String>,
     interval: f64,
@@ -19,7 +20,7 @@ struct Config {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<(), Error> {
     let config: Config = serde_yaml::from_str(
         &tokio::fs::read_to_string(
             std::env::args()
@@ -31,11 +32,11 @@ async fn main() -> anyhow::Result<()> {
     )?;
     let config = Arc::new(config);
     let http_client = reqwest::Client::new();
-    let ruma_client = ruma::client::Client::with_http_client(
-        http_client.clone(),
-        config.base_url.clone(),
-        Some(config.access_token.clone()),
-    );
+    let ruma_client = ruma::client::Client::builder()
+        .homeserver_url(config.base_url.clone())
+        .access_token(Some(config.access_token.clone()))
+        .http_client(http_client.clone())
+        .await?;
 
     let mut cooldown_map: HashMap<String, usize> = config
         .health_checks
@@ -62,16 +63,22 @@ async fn main() -> anyhow::Result<()> {
                     .await
                     .and_then(|res| res.error_for_status())
                 {
-                    let txn_id = base32::encode(
-                        base32::Alphabet::RFC4648 { padding: false },
-                        &rand::random::<[u8; 8]>()[..],
+                    let txn_id = TransactionId::new();
+                    let content = AnyMessageLikeEventContent::RoomMessage(
+                        RoomMessageEventContent::text_plain(format!(
+                            "HEALTH CHECK {} FAILED: {}",
+                            health_check, e
+                        )),
                     );
-                    let content =
-                        AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
-                            format!("HEALTH CHECK {} FAILED: {}", health_check, e),
-                        ));
-                    let request = send_message_event::Request::new(&cfg.room_id, &txn_id, &content);
-                    if let Err(e) = ruma_client.send_request_as(&cfg.user_id, request).await {
+
+                    if let Err(e) = async {
+                        let request =
+                            send_message_event::v3::Request::new(&cfg.room_id, &txn_id, &content)?;
+                        let res = ruma_client.send_request_as(&cfg.user_id, request).await?;
+                        Ok::<_, Error>(res)
+                    }
+                    .await
+                    {
                         eprintln!("ERROR SENDING MATRIX MESSAGE: {}", e);
                     }
 

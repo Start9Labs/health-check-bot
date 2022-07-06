@@ -7,12 +7,15 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.43"
-base32 = "0.4.0"
-openssl = { version = "0.10.35", features = ["vendored"] }
-rand = "0.8.4"
-reqwest = "0.11.4"
-ruma = { version = "0.3.0", features = ["client-api-c", "client-ext-client-api", "client-reqwest"] }
-serde = { version = "1.0.127", features = ["derive"] }
-serde_yaml = "0.8.17"
-tokio = { version = "1.10.0", features = ["full"] }
+color-eyre = "0.6.1"
+openssl = { version = "0.10.40", features = ["vendored"] }
+reqwest = "0.11.11"
+ruma = { version = "0.6.4", features = [
+  "client-api-c",
+  "client-ext-client-api",
+  "client-reqwest",
+  "rand",
+] }
+serde = { version = "1.0.138", features = ["derive"] }
+serde_yaml = "0.8.24"
+tokio = { version = "1.19.2", features = ["full"] }
